@@ -1,9 +1,10 @@
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.wait import WebDriverWait
+import allure
 from selenium.webdriver.common.by import By
+from pages.base_page import BasePage
 
 
-class QuestionsAboutImportant:
+class QuestionsAboutImportant(BasePage):
+
     FIRST_QUESTION = (By.ID, "accordion__heading-0")
     SECOND_QUESTION = (By.ID, "accordion__heading-1")
     THIRD_QUESTION = (By.ID, "accordion__heading-2")
@@ -23,23 +24,20 @@ class QuestionsAboutImportant:
     EIGHTH_ANSWER = (By.ID, "accordion__panel-7")
 
     COOKIE_ACCEPT_BUTTON = (By.XPATH, "//button[text()='да все привыкли']")
-    URL = "https://qa-scooter.praktikum-services.ru/"
-    
-    def __init__(self, driver):
-        self.driver = driver
 
+    @allure.step("Принять файлы cookie")
     def accept_cookies(self):
-        self.driver.find_element(*self.COOKIE_ACCEPT_BUTTON).click()
+        self.click_element(self.COOKIE_ACCEPT_BUTTON)
 
+    @allure.step("Получить видимый текст вопроса")
     def get_question_text(self, locator):
-        WebDriverWait(self.driver, 5).until(expected_conditions.visibility_of_element_located(locator))
-        return self.driver.find_element(*locator).text
+        return self.find_element(locator).text
 
+    @allure.step("Прокрутить до вопроса и кликнуть по нему")
     def click_question(self, locator):
-        element = self.driver.find_element(*locator)
-        self.driver.execute_script("arguments[0].scrollIntoView(false);", element)
-        element.click()
+        self.scroll_to_element(locator)
+        self.click_element(locator)
 
+    @allure.step("Получить текст открывшегося ответа")
     def get_answer_text(self, locator):
-        WebDriverWait(self.driver, 5).until(expected_conditions.visibility_of_element_located(locator))
-        return self.driver.find_element(*locator).text
+        return self.find_element(locator).text

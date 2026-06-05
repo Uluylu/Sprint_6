@@ -1,10 +1,10 @@
+import allure
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webdriver import WebDriver
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.wait import WebDriverWait
+from pages.base_page import BasePage
 
 
-class OrderPage:
+class OrderPage(BasePage):
+
     FIRST_NAME_INPUT = (By.XPATH, "//input[contains(@placeholder, 'Имя')]")
     LAST_NAME_INPUT = (By.XPATH, "//input[contains(@placeholder, 'Фамилия')]")
     ADDRESS_INPUT = (By.XPATH, "//input[contains(@placeholder, 'Адрес')]")
@@ -27,29 +27,32 @@ class OrderPage:
     SUCCESS_POPUP_FORM = (By.XPATH, "//div[text()='Заказ оформлен']")
     CLOSE_POPUP_FORM = (By.XPATH, "//button[text()='Посмотреть статус']")
 
-
-    def __init__(self, driver: WebDriver):
-        self.driver = driver
-
+    @allure.step("Заполнить персональные данные клиента")
     def fill_client_info(self, first_name, last_name, address, metro, phone):
-        self.driver.find_element(*self.FIRST_NAME_INPUT).send_keys(first_name)
-        self.driver.find_element(*self.LAST_NAME_INPUT).send_keys(last_name)
-        self.driver.find_element(*self.ADDRESS_INPUT).send_keys(address)
-        self.driver.find_element(*self.METRO_INPUT).click()
-        WebDriverWait(self.driver, 3).until(expected_conditions.visibility_of_element_located(metro)).click()
-        self.driver.find_element(*self.PHONE_NUMBER_INPUT).send_keys(phone)
-        self.driver.find_element(*self.NEXT_BUTTON).click()
+        self.fill_field(self.FIRST_NAME_INPUT, first_name)
+        self.fill_field(self.LAST_NAME_INPUT, last_name)
+        self.fill_field(self.ADDRESS_INPUT, address)
 
+        self.click_element(self.METRO_INPUT)
+        self.click_element(metro)
+
+        self.fill_field(self.PHONE_NUMBER_INPUT, phone)
+        self.click_element(self.NEXT_BUTTON)
+
+    @allure.step("Заполнить информацию об аренде и подтвердить заказ")
     def fill_rent_info(self, date, rental_period, color, comment):
-        WebDriverWait(self.driver, 3).until(expected_conditions.visibility_of_element_located(self.DATE_INPUT)).send_keys(date)
-        self.driver.find_element(*self.RENTAL_LOGO).click()
-        self.driver.find_element(*self.RENTAL_PERIOD).click()
-        WebDriverWait(self.driver, 3).until(expected_conditions.visibility_of_element_located(rental_period)).click()
-        self.driver.find_element(*color).click()
-        self.driver.find_element(*self.COMMENT_INPUT).send_keys(comment)
-        self.driver.find_element(*self.ORDER_BUTTON).click()
-        WebDriverWait(self.driver, 5).until(expected_conditions.visibility_of_element_located(self.CONFIRM_YES_BUTTON)).click()
+        self.fill_field(self.DATE_INPUT, date)
+        
+        self.click_element(self.RENTAL_LOGO)
+        self.click_element(self.RENTAL_PERIOD)
+        
+        self.click_element(rental_period)
+        self.click_element(color)
 
+        self.fill_field(self.COMMENT_INPUT, comment)
+        self.click_element(self.ORDER_BUTTON)
+        self.click_element(self.CONFIRM_YES_BUTTON)
+
+    @allure.step("Получить текст подтверждения из всплывающего окна")
     def get_success_popup_text(self):
-        WebDriverWait(self.driver, 5).until(expected_conditions.visibility_of_element_located(self.SUCCESS_POPUP_FORM))
-        return self.driver.find_element(*self.SUCCESS_POPUP_FORM).text
+        return self.find_element(self.SUCCESS_POPUP_FORM).text

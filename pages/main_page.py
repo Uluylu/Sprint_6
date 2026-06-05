@@ -1,32 +1,33 @@
+import allure
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webdriver import WebDriver
+from pages.base_page import BasePage
 
 
-class MainPage:
+class MainPage(BasePage):
+
     TOP_BUTTON_ORDER = (By.XPATH, "//div[contains(@class, 'Header_Nav')]/button[text()='Заказать']")
     BOTTOM_BUTTON_ORDER = (By.XPATH, "//div[contains(@class, 'Home_FinishButton')]/button[text()='Заказать']")
     SCOOTER_LOGO = (By.XPATH, "//a[contains(@class, 'Header_LogoScooter')]/img[@alt='Scooter']")
     YANDEX_LOGO = (By.XPATH, "//a[contains(@class, 'Header_LogoYandex')]/img[@alt='Yandex']")
-    BASE_URL = "https://qa-scooter.praktikum-services.ru/"
-    DZEN_URL = "https://dzen.ru/?yredirect=true"
     COOKIE_ACCEPT_BUTTON = (By.XPATH, "//button[text()='да все привыкли']")
-
-    def __init__(self, driver: WebDriver):
-        self.driver = driver
-
+    
+    @allure.step("Принять файлы cookie")
     def accept_cookies(self):
-        self.driver.find_element(*self.COOKIE_ACCEPT_BUTTON).click()
+        self.click_element(self.COOKIE_ACCEPT_BUTTON)
 
+    @allure.step("Кликнуть по верхней кнопке «Заказать»")
     def click_top_button_order(self):
-        self.driver.find_element(*self.TOP_BUTTON_ORDER).click()
+        self.click_element(self.TOP_BUTTON_ORDER)
 
+    @allure.step("Прокрутить страницу и кликнуть по нижней кнопке «Заказать»")
     def click_bottom_button_order(self):
-        element = self.driver.find_element(*self.BOTTOM_BUTTON_ORDER)
-        self.driver.execute_script("arguments[0].scrollIntoView(false);", element)
-        element.click()
+        self.scroll_to_element(self.BOTTOM_BUTTON_ORDER)
+        self.click_element(self.BOTTOM_BUTTON_ORDER)
 
+    @allure.step("Кликнуть по логотипу «Самокат»")
     def click_scooter_logo(self):
-        self.driver.find_element(*self.SCOOTER_LOGO).click()
+        self.click_element(self.SCOOTER_LOGO)
 
+    @allure.step("Кликнуть по логотипу «Яндекс»")
     def click_yandex_logo(self):
-        self.driver.find_element(*self.YANDEX_LOGO).click()
+        self.click_element(self.YANDEX_LOGO)

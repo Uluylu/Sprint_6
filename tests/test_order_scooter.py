@@ -1,55 +1,47 @@
 import pytest
-from selenium import webdriver
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 from pages.main_page import MainPage
 from pages.order_page import OrderPage
+from constants import OrderConstants
+from urls import Urls
+
 
 class TestOrderScooter:
-    driver = None
-
-    @classmethod
-    def setup_class(cls):
-        cls.driver = webdriver.Firefox()
-        cls.driver.get(MainPage.BASE_URL)
-        main_page = MainPage(cls.driver)
-        main_page.accept_cookies()
 
     @pytest.mark.parametrize(
             "order_button, first_name, last_name, address, metro, phone, date, rental_period, color, comment",
             [
-                (MainPage.TOP_BUTTON_ORDER, "Иван", "Иванов", "Ул. Пушкина, д. 10", 
-                OrderPage.METRO_STATION_CHERKIZOVSKAYA, "88005553535", "30.06.2026", 
-                OrderPage.RENTAL_PERIOD_ONE_DAY, OrderPage.BLACK_COLOR_CHECKBOX, "Позвоните за час"),
-                
-                (MainPage.BOTTOM_BUTTON_ORDER, "Петр", "Сидоров", "Ул. Ленина, д. 22", 
-                OrderPage.METRO_STATION_SOKOLNIKI, "+79998887766", "11.06.2026", 
-                OrderPage.RENTAL_PERIOD_TWO_DAYS, OrderPage.GREY_COLOR_CHECKBOX, " ")
-            ]
+            (MainPage.TOP_BUTTON_ORDER, 
+             OrderConstants.FIRST_NAME_1, OrderConstants.LAST_NAME_1, OrderConstants.ADDRESS_1, 
+             OrderPage.METRO_STATION_CHERKIZOVSKAYA, OrderConstants.PHONE_1, OrderConstants.DATE_1, 
+             OrderPage.RENTAL_PERIOD_ONE_DAY, OrderPage.BLACK_COLOR_CHECKBOX, OrderConstants.COMMENT_1),
+            
+            (MainPage.BOTTOM_BUTTON_ORDER, 
+             OrderConstants.FIRST_NAME_2, OrderConstants.LAST_NAME_2, OrderConstants.ADDRESS_2, 
+             OrderPage.METRO_STATION_SOKOLNIKI, OrderConstants.PHONE_2, OrderConstants.DATE_2, 
+             OrderPage.RENTAL_PERIOD_TWO_DAYS, OrderPage.GREY_COLOR_CHECKBOX, OrderConstants.COMMENT_2)
+        ]
     )
 
-    def test_order_scooter_flow_success(self, order_button, first_name, last_name, address, metro, phone, date, rental_period, color, comment):
-        self.driver.get(MainPage.BASE_URL)
+    def test_order_scooter_flow_success(self, driver, order_button, first_name, last_name, address, metro, phone, date, rental_period, color, comment):
+        main_page = MainPage(driver)
+        main_page.open_url(Urls.BASE_URL)
+        main_page.accept_cookies()
 
-        main_page = MainPage(self.driver)
-        order_page = OrderPage(self.driver)
+        order_page = OrderPage(driver)
 
-        self.driver.find_element(*order_button).click()
+        main_page.click_element(order_button)
         order_page.fill_client_info(first_name, last_name, address, metro, phone)
         order_page.fill_rent_info(date, rental_period, color, comment)
         assert "Заказ оформлен" in order_page.get_success_popup_text()
 
-        self.driver.find_element(*OrderPage.CLOSE_POPUP_FORM).click()
+        order_page.click_element(OrderPage.CLOSE_POPUP_FORM)
 
         main_page.click_scooter_logo()
-        assert self.driver.current_url == MainPage.BASE_URL
+        assert main_page.get_current_url() == Urls.BASE_URL
 
         main_page.click_yandex_logo()
-        self.driver.switch_to.window(self.driver.window_handles[-1])
-        WebDriverWait(self.driver, 5).until(expected_conditions.url_contains("dzen.ru"))
-        assert "dzen.ru" in self.driver.current_url
-        
-    @classmethod
-    def teardown_class(cls):
-        cls.driver.quit()
-        
+        driver.switch_to.window(driver.window_handles[-1])
+        WebDriverWait(driver, 5).until(expected_conditions.url_contains("dzen.ru"))
+        assert "dzen.ru" in main_page.get_current_url()
