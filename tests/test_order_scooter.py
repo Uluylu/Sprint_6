@@ -1,6 +1,4 @@
 import pytest
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.wait import WebDriverWait
 from pages.main_page import MainPage
 from pages.order_page import OrderPage
 from constants import OrderConstants
@@ -42,6 +40,6 @@ class TestOrderScooter:
         assert main_page.get_current_url() == Urls.BASE_URL
 
         main_page.click_yandex_logo()
-        driver.switch_to.window(driver.window_handles[-1])
-        WebDriverWait(driver, 5).until(expected_conditions.url_contains("dzen.ru"))
-        assert "dzen.ru" in main_page.get_current_url()
+        main_page.switch_to_new_tab()
+        main_page.wait_for_dzen_url()
+        assert Urls.DZEN_URL in main_page.get_current_url()
